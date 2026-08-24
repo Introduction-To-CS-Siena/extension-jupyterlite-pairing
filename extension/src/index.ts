@@ -439,10 +439,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: 'Join Notebook Pairing',
       caption: 'Create a new notebook and join a shared pairing session',
       execute: async () => {
-        const widget = await app.commands.execute('notebook:create-new');
-        const panel = widget as NotebookPanel;
-        await panel.context.ready;
-        await joinPairing(panel, { skipConfirmation: true });
+        try {
+          const widget = await app.commands.execute('notebook:create-new');
+          if (!(widget instanceof NotebookPanel)) {
+            throw new Error('Could not create a new notebook to join into.');
+          }
+          await widget.context.ready;
+          await joinPairing(widget, { skipConfirmation: true });
+        } catch (error) {
+          await reportError(error);
+        }
       }
     });
     if (launcher) {
