@@ -1,5 +1,34 @@
 # JupyterLite Notebook Pairing
 
+## Notebook pairing
+
+The pairing extension is maintained and deployed from its own repository. This
+site consumes its prebuilt wheel using an exact PyPI pin:
+
+```text
+csis110-jupyterlab-pairing==0.1.1
+```
+
+Each pairing room:
+
+- is addressed by a random ten-character code;
+- is isolated in its own Durable Object;
+- stores the Yjs document in Durable Object storage; and
+- expires after 24 hours by default.
+
+Treat the pairing code like a temporary password. Joining replaces the current
+notebook contents, so students should join from a new notebook unless they do
+not need the local copy.
+
+### Pairing service
+
+The Worker is built and deployed by the pairing extension repository, not by
+this site's workflow. The extension connects to `sync.lab.csis110.com` by
+default; another URL can be selected with `serviceUrl` in the JupyterLab
+**Notebook Pairing** settings.
+
+
+
 A self-contained JupyterLab extension and Cloudflare Durable Object service for
 pairing browser-based JupyterLite notebooks with a short room code.
 
