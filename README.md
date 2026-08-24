@@ -57,7 +57,7 @@ independently and can be shared by multiple sites listed in `ALLOWED_ORIGINS`.
 After publishing a release, add an exact pin to that site's `requirements.txt`:
 
 ```text
-csis110-jupyterlab-pairing==0.1.0
+csis110-jupyterlab-pairing==0.2.0
 ```
 
 Installing the wheel registers the prebuilt extension. A normal

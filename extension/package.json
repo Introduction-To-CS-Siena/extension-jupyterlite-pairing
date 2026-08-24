@@ -1,6 +1,6 @@
 {
   "name": "@csis110/jupyterlab-pairing",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Pair JupyterLite notebooks through a Cloudflare Durable Object service",
   "license": "BSD-3-Clause",
@@ -21,8 +21,10 @@
     "@jupyter/ydoc": "4.1.1",
     "@jupyterlab/application": "4.6.3",
     "@jupyterlab/apputils": "4.7.3",
+    "@jupyterlab/launcher": "4.6.3",
     "@jupyterlab/notebook": "4.6.3",
     "@jupyterlab/settingregistry": "4.6.3",
+    "@lumino/widgets": "2.9.0",
     "y-protocols": "1.0.7",
     "yjs": "13.6.32"
   },
