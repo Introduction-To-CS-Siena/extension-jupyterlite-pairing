@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "csis110-jupyterlab-pairing"
-version = "0.1.0"
+version = "0.1.1"
 description = "Pair JupyterLite notebooks through a Cloudflare Durable Object service"
 readme = "README.md"
 license = "BSD-3-Clause"
