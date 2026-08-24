@@ -27,8 +27,8 @@
     "yjs": "13.6.32"
   },
   "devDependencies": {
-    "@jupyter/builder": "1.2.1",
-    "rimraf": "6.0.1",
+    "@jupyter/builder": "1.2.2",
+    "rimraf": "6.1.3",
     "typescript": "5.9.3"
   },
   "overrides": {
