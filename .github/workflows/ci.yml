@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: extension/requirements-build.txt
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+      - name: Install build dependencies
+        run: python -m pip install -r extension/requirements-build.txt
+      - name: Build extension and wheel
+        working-directory: extension
+        run: |
+          npm ci
+          npm run build
+          python -m build --wheel --no-isolation
+      - name: Validate wheel installation
+        working-directory: extension
+        run: |
+          python -m pip install --force-reinstall --no-deps dist/*.whl
+          jupyter labextension list 2>&1 | tee /tmp/jupyterlab-extensions.txt
+          grep -q "@csis110/jupyterlab-pairing.*OK" /tmp/jupyterlab-extensions.txt
+
+  worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: worker/package-lock.json
+      - name: Validate Worker
+        working-directory: worker
+        run: |
+          npm ci
+          npm run check
+          npm audit --omit=dev
+

@@ -1,0 +1,56 @@
+{
+  "name": "@csis110/jupyterlab-pairing",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pair JupyterLite notebooks through a Cloudflare Durable Object service",
+  "license": "BSD-3-Clause",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "lib/**/*.{js,js.map,d.ts}",
+    "schema/*.json"
+  ],
+  "scripts": {
+    "build": "npm run build:lib && npm run build:extension",
+    "build:extension": "jupyter-builder build .",
+    "build:lib": "tsc --build --force",
+    "clean": "rimraf lib labextension csis110_jupyterlab_pairing/labextension tsconfig.tsbuildinfo"
+  },
+  "dependencies": {
+    "@hocuspocus/provider": "4.6.0",
+    "@jupyter/ydoc": "4.1.1",
+    "@jupyterlab/application": "4.6.3",
+    "@jupyterlab/apputils": "4.7.3",
+    "@jupyterlab/notebook": "4.6.3",
+    "@jupyterlab/settingregistry": "4.6.3",
+    "y-protocols": "1.0.7",
+    "yjs": "13.6.32"
+  },
+  "devDependencies": {
+    "@jupyter/builder": "1.2.1",
+    "rimraf": "6.0.1",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "sanitize-html": "2.17.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "jupyterlab": {
+    "extension": true,
+    "outputDir": "csis110_jupyterlab_pairing/labextension",
+    "schemaDir": "schema",
+    "sharedPackages": {
+      "y-protocols": {
+        "bundled": false,
+        "singleton": true
+      },
+      "yjs": {
+        "bundled": false,
+        "singleton": true
+      }
+    }
+  }
+}
+

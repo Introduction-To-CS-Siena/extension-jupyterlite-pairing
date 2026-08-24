@@ -1,0 +1,11 @@
+*.egg-info/
+*.py[cod]
+.pytest_cache/
+.wrangler/
+__pycache__/
+build/
+dist/
+labextension/
+lib/
+node_modules/
+*.tsbuildinfo

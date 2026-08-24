@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools==84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "csis110-jupyterlab-pairing"
+version = "0.1.0"
+description = "Pair JupyterLite notebooks through a Cloudflare Durable Object service"
+readme = "README.md"
+license = "BSD-3-Clause"
+requires-python = ">=3.11"
+classifiers = [
+  "Framework :: Jupyter :: JupyterLab :: Extensions :: Prebuilt",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+]
+
+[tool.setuptools]
+include-package-data = false
+packages = ["csis110_jupyterlab_pairing"]
+
+[tool.setuptools.data-files]
+"share/jupyter/labextensions/@csis110/jupyterlab-pairing" = [
+  "csis110_jupyterlab_pairing/labextension/package.json",
+]
+"share/jupyter/labextensions/@csis110/jupyterlab-pairing/static" = [
+  "csis110_jupyterlab_pairing/labextension/static/*",
+]
+"share/jupyter/labextensions/@csis110/jupyterlab-pairing/schemas/@csis110/jupyterlab-pairing" = [
+  "csis110_jupyterlab_pairing/labextension/schemas/@csis110/jupyterlab-pairing/*",
+]

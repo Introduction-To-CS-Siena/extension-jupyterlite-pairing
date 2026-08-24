@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "csis110-pairing",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-24",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "PAIRING_ROOMS",
+        "class_name": "PairingRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["PairingRoom"]
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://lab.csis110.com,http://127.0.0.1:8000,http://localhost:8000",
+    "ROOM_TTL_SECONDS": "86400"
+  },
+  "observability": {
+    "enabled": true
+  }
+}
+

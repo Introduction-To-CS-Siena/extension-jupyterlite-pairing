@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "jupyter.lab.setting-icon": "ui-components:users",
+  "jupyter.lab.setting-icon-label": "Notebook Pairing",
+  "title": "Notebook Pairing",
+  "description": "Connect notebooks through a Cloudflare Durable Object service.",
+  "type": "object",
+  "properties": {
+    "serviceUrl": {
+      "title": "Pairing service URL",
+      "description": "HTTPS base URL of the deployed Cloudflare Worker.",
+      "type": "string",
+      "default": "https://sync.lab.csis110.com"
+    }
+  },
+  "additionalProperties": false
+}
+
