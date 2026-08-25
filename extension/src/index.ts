@@ -12,6 +12,7 @@ import {
 import { ILauncher } from '@jupyterlab/launcher';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
 import { YNotebook } from '@jupyter/ydoc';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Awareness } from 'y-protocols/awareness';
@@ -21,6 +22,20 @@ const PLUGIN_ID = '@csis110/jupyterlab-pairing:plugin';
 const JOIN_COMMAND_ID = '@csis110/jupyterlab-pairing:join-pairing';
 const ROOM_CODE_PATTERN = /^[A-HJ-KM-NP-Z2-9]{5}-?[A-HJ-KM-NP-Z2-9]{5}$/;
 const PRESENCE_CATEGORY = 'Notebook Pairing';
+
+// Two-person "pairing" glyph so the launcher tile isn't just a text label.
+// jp-icon3 lets the fill follow JupyterLab's theme (including selected/hover states).
+const pairingIconSvgStr = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+  <path class="jp-icon3" fill="#616161" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+</svg>
+`;
+
+const pairingIcon = new LabIcon({
+  name: '@csis110/jupyterlab-pairing:pairing',
+  svgstr: pairingIconSvgStr
+});
+
 // Distinct, readable hues; partners are assigned one deterministically by client ID.
 const PARTNER_COLORS = [
   '#e6194b',
@@ -438,6 +453,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(JOIN_COMMAND_ID, {
       label: 'Join Notebook Pairing',
       caption: 'Create a new notebook and join a shared pairing session',
+      icon: pairingIcon,
       execute: async () => {
         try {
           const widget = await app.commands.execute('notebook:create-new');
