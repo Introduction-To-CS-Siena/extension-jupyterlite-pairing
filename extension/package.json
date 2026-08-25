@@ -6,9 +6,13 @@
   "license": "BSD-3-Clause",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
+  "styleModule": "style/index.js",
   "files": [
     "lib/**/*.{js,js.map,d.ts}",
-    "schema/*.json"
+    "schema/*.json",
+    "style/**/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "npm run build:lib && npm run build:extension",
@@ -25,6 +29,7 @@
     "@jupyterlab/notebook": "4.6.3",
     "@jupyterlab/settingregistry": "4.6.3",
     "@jupyterlab/ui-components": "4.6.3",
+    "@lumino/signaling": "2.1.6",
     "@lumino/widgets": "2.9.0",
     "y-protocols": "1.0.7",
     "yjs": "13.6.32"

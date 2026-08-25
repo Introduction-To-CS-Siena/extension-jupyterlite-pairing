@@ -4,7 +4,12 @@ JupyterLab extension for pairing JupyterLite notebooks through the
 Cloudflare Durable Object service.
 
 After installation, notebooks receive **Start pairing** and **Join pairing**
-toolbar buttons, and a **Join Notebook Pairing** launcher tile.
+toolbar buttons, a **Join Notebook Pairing** launcher tile, and a **Notebook
+Pairing** panel in the right sidebar.
+
+The sidebar panel keeps the active session's pairing code on screen with a copy
+button, so it can still be shared with a third person after the session has
+started.
 
 The Worker this extension talks to is controlled by the `serviceUrl` setting
 (**Settings → Notebook Pairing** in JupyterLab). See the [repository

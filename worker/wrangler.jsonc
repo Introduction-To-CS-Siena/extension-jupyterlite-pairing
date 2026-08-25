@@ -3,6 +3,10 @@
   "name": "csis110-pairing",
   "main": "src/index.ts",
   "compatibility_date": "2026-08-24",
+  // Cloudflare Access applications are scoped to a hostname. Leaving the
+  // workers.dev hostname enabled would expose /admin on a name the Access
+  // policy does not cover, so the custom domain is the only way in.
+  "workers_dev": false,
   "durable_objects": {
     "bindings": [
       {
@@ -17,9 +21,24 @@
       "new_sqlite_classes": ["PairingRoom"]
     }
   ],
+  // Create with `npx wrangler d1 create csis110-pairing` and paste the id it
+  // prints. Apply schema changes with `npx wrangler d1 migrations apply`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "csis110-pairing",
+      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+    }
+  ],
   "vars": {
     "ALLOWED_ORIGINS": "https://lab.csis110.com,http://127.0.0.1:8000,http://localhost:8000",
-    "ROOM_TTL_SECONDS": "86400"
+    "ROOM_TTL_SECONDS": "86400",
+    // Both must be set for /admin to exist at all; unset means 404, not 403.
+    // ACCESS_TEAM_DOMAIN looks like "yourteam.cloudflareaccess.com" and
+    // ACCESS_AUD is the Access application's AUD tag.
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "ADMIN_HISTORY_SECONDS": "604800"
   },
   "observability": {
     "enabled": true
