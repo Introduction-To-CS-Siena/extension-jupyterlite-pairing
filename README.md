@@ -115,14 +115,23 @@ addressed by their code. A Durable Object's storage is private to that one
 instance, so there is no way to enumerate them — rooms report themselves into
 a D1 table instead, which the dashboard reads.
 
-Create the database once per deployment and paste the id it prints into
-`d1_databases[0].database_id` in `worker/wrangler.jsonc`:
+Create the database once per deployment, then put the name you chose and the
+id it prints into `d1_databases[0]` in `worker/wrangler.jsonc`:
 
 ```bash
 cd worker
-npx wrangler d1 create csis110-pairing
-npx wrangler d1 migrations apply csis110-pairing --remote
+npx wrangler d1 create csis110-jupyterlite-pairing
+npx wrangler d1 migrations apply csis110-jupyterlite-pairing --remote
 ```
+
+Neither value is a secret — a `database_id` is an identifier, and reaching the
+database still requires your Cloudflare API token — so both live in
+`wrangler.jsonc` alongside the rest of the Worker's configuration rather than
+in GitHub secrets. Wrangler does not interpolate environment variables into its
+config, so these cannot be supplied from the environment at deploy time.
+
+The database name appears in two places: `worker/wrangler.jsonc` and the
+migration step in `.github/workflows/deploy-worker.yml`. Change both together.
 
 The deploy workflow applies migrations before each deploy, so later schema
 changes only need a new file in `worker/migrations/`.
@@ -201,7 +210,7 @@ Then apply the schema to the local database and pass the header:
 
 ```bash
 cd worker
-npx wrangler d1 migrations apply csis110-pairing --local
+npx wrangler d1 migrations apply csis110-jupyterlite-pairing --local
 npm run dev
 curl -H "x-admin-dev-token: some-local-secret" http://127.0.0.1:8787/admin/api/rooms
 ```

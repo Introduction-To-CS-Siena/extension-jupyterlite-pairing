@@ -21,8 +21,10 @@
       "new_sqlite_classes": ["PairingRoom"]
     }
   ],
-  // Create with `npx wrangler d1 create csis110-pairing` and paste the id it
-  // prints. Apply schema changes with `npx wrangler d1 migrations apply`.
+  // Create with `npx wrangler d1 create <name>` and paste the id it prints.
+  // Apply schema changes with `npx wrangler d1 migrations apply <name>`.
+  // Renaming the database also means updating the migration step in
+  // .github/workflows/deploy-worker.yml, which names it directly.
   "d1_databases": [
     {
       "binding": "DB",
