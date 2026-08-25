@@ -23,8 +23,8 @@
   ],
   // Create with `npx wrangler d1 create <name>` and paste the id it prints.
   // Apply schema changes with `npx wrangler d1 migrations apply <name>`.
-  // The deploy workflow reads database_name from here, so renaming the
-  // database only needs to happen in this file.
+  // Renaming the database also means updating the migration step in
+  // .github/workflows/deploy-worker.yml, which names it directly.
   "d1_databases": [
     {
       "binding": "DB",

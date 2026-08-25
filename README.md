@@ -120,16 +120,18 @@ id it prints into `d1_databases[0]` in `worker/wrangler.jsonc`:
 
 ```bash
 cd worker
-npx wrangler d1 create your-database-name
-npx wrangler d1 migrations apply your-database-name --remote
+npx wrangler d1 create csis110-jupyterlite-pairing
+npx wrangler d1 migrations apply csis110-jupyterlite-pairing --remote
 ```
 
 Neither value is a secret — a `database_id` is an identifier, and reaching the
 database still requires your Cloudflare API token — so both live in
 `wrangler.jsonc` alongside the rest of the Worker's configuration rather than
 in GitHub secrets. Wrangler does not interpolate environment variables into its
-config, so that file is the single source of truth: the deploy workflow reads
-the database name out of it instead of repeating it.
+config, so these cannot be supplied from the environment at deploy time.
+
+The database name appears in two places: `worker/wrangler.jsonc` and the
+migration step in `.github/workflows/deploy-worker.yml`. Change both together.
 
 The deploy workflow applies migrations before each deploy, so later schema
 changes only need a new file in `worker/migrations/`.
