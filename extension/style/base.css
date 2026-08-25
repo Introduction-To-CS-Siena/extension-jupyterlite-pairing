@@ -1,0 +1,85 @@
+/*
+ * Styles are written against JupyterLab's CSS variables rather than fixed
+ * colours so the panel follows whatever theme the site is using.
+ */
+
+.csis110-PairingPanel {
+  overflow: auto;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.csis110-PairingPanel-body {
+  padding: 12px 16px 20px;
+  font-size: var(--jp-ui-font-size1);
+}
+
+.csis110-PairingPanel-body h2 {
+  font-size: var(--jp-ui-font-size2);
+  margin: 0 0 8px;
+}
+
+.csis110-PairingPanel-body h3 {
+  font-size: var(--jp-ui-font-size1);
+  margin: 20px 0 6px;
+  color: var(--jp-ui-font-color2);
+}
+
+.csis110-PairingPanel-status {
+  margin: 0 0 12px;
+  color: var(--jp-ui-font-color2);
+  line-height: 1.4;
+}
+
+/* The reason the panel exists: the code has to stay readable across the room. */
+.csis110-PairingPanel-code {
+  font-family: var(--jp-code-font-family);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 4px;
+  background: var(--jp-layout-color2);
+  user-select: all;
+  text-align: center;
+}
+
+.csis110-PairingPanel-expiry {
+  margin: 8px 0 0;
+  color: var(--jp-ui-font-color2);
+  font-size: var(--jp-ui-font-size0);
+}
+
+.csis110-PairingPanel-partners {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.csis110-PairingPanel-partners li {
+  display: flex;
+  align-items: center;
+  padding: 3px 0;
+}
+
+.csis110-PairingPanel-muted {
+  color: var(--jp-ui-font-color3);
+}
+
+.csis110-PairingPanel-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 8px;
+  flex: none;
+}
+
+.csis110-PairingPanel-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+}

@@ -30,6 +30,7 @@ not need the local copy.
 
 - `extension/` — TypeScript extension plus its Python wheel wrapper.
 - `worker/` — Worker, Durable Object, persistence, expiration, and WebSockets.
+- `worker/migrations/` — D1 schema for the session index behind `/admin`.
 - `.github/workflows/ci.yml` — validates both deliverables.
 - `.github/workflows/release-extension.yml` — publishes release wheels to PyPI.
 - `.github/workflows/deploy-worker.yml` — manually deploys the Worker.
@@ -102,8 +103,111 @@ The Worker side lives in [`worker/wrangler.jsonc`](worker/wrangler.jsonc):
   domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)
   in the Cloudflare dashboard, not in this file. Whatever domain you attach
   is the URL you should use for `serviceUrl` above.
+- `workers_dev` is set to `false` on purpose. See **Why `workers_dev` is
+  off** under the admin dashboard below before changing it.
 
 After changing `wrangler.jsonc`, redeploy — see **Deploy the Worker** below.
+
+### Session index (D1)
+
+The dashboard needs to list every pairing room, and rooms are Durable Objects
+addressed by their code. A Durable Object's storage is private to that one
+instance, so there is no way to enumerate them — rooms report themselves into
+a D1 table instead, which the dashboard reads.
+
+Create the database once per deployment and paste the id it prints into
+`d1_databases[0].database_id` in `worker/wrangler.jsonc`:
+
+```bash
+cd worker
+npx wrangler d1 create csis110-pairing
+npx wrangler d1 migrations apply csis110-pairing --remote
+```
+
+The deploy workflow applies migrations before each deploy, so later schema
+changes only need a new file in `worker/migrations/`.
+
+Index writes are best-effort by design: if D1 is unavailable, pairing keeps
+working and the room simply does not appear on the dashboard.
+
+## Admin dashboard
+
+`https://<your-worker-domain>/admin` lists every pairing session — code,
+status, how many people are connected, when it was created, and when it
+expires — and can end a session early or preview the notebook inside one.
+
+It is disabled until you configure Cloudflare Access. With
+`ACCESS_TEAM_DOMAIN` or `ACCESS_AUD` unset, every `/admin` route returns 404,
+so a deployment that skips this section has no dashboard rather than an open
+one.
+
+### Setup
+
+1. In the Cloudflare dashboard, create a **self-hosted Access application**
+   for `<your-worker-domain>/admin*`. The single `/admin*` prefix covers both
+   the page and its API, so there is no second path to remember.
+2. Add a policy for whoever should get in (an email, a group, an identity
+   provider rule).
+3. Copy the application's **AUD tag**.
+4. Set both values in `worker/wrangler.jsonc`:
+
+   ```jsonc
+   "ACCESS_TEAM_DOMAIN": "yourteam.cloudflareaccess.com",
+   "ACCESS_AUD": "<the AUD tag>"
+   ```
+
+5. Redeploy.
+
+### Why `workers_dev` is off
+
+An Access application is scoped to a hostname. If the Worker is also reachable
+at `<name>.<account>.workers.dev`, that hostname is not covered by a policy
+written for your custom domain, and `/admin` is served there with no
+authentication at all. `workers_dev: false` removes that second door. The same
+applies to any extra route or custom domain you bind later.
+
+### Why the Worker verifies the token too
+
+The Worker independently verifies the `Cf-Access-Jwt-Assertion` header rather
+than trusting that a request arrived through Access. This keeps the check in
+version control next to the thing it protects — an Access policy edited or
+deleted in the dashboard cannot silently unprotect the route — and it gives the
+Worker the caller's identity, which the edge gate alone does not. Admin actions
+that reach student notebooks are logged with that verified email.
+
+### What admins can see
+
+Two things worth being explicit about, since this touches student work:
+
+- Pairing codes are shown masked (`ABCDE-•••••`) and reveal on click. A
+  revealed code is a working capability — anyone holding it can join that
+  session.
+- **Inspect** renders a read-only preview of the notebook's current contents.
+
+Both are deliberate instructor powers, not incidental. `ADMIN_HISTORY_SECONDS`
+controls how long ended sessions stay listed (default 7 days) before being
+pruned.
+
+### Working on the dashboard locally
+
+`wrangler dev` cannot mint Access assertions, so local runs use a shared-secret
+header instead. Create `worker/.dev.vars` (gitignored, never deployed):
+
+```text
+ADMIN_DEV_TOKEN=some-local-secret
+```
+
+Then apply the schema to the local database and pass the header:
+
+```bash
+cd worker
+npx wrangler d1 migrations apply csis110-pairing --local
+npm run dev
+curl -H "x-admin-dev-token: some-local-secret" http://127.0.0.1:8787/admin/api/rooms
+```
+
+Production never sets `ADMIN_DEV_TOKEN`, and when it is set the Access check is
+skipped entirely — so it belongs only in `.dev.vars`.
 
 ## Develop and test
 

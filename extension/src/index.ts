@@ -1,4 +1,5 @@
 import {
+  ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -17,6 +18,13 @@ import { YNotebook } from '@jupyter/ydoc';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Awareness } from 'y-protocols/awareness';
 import { Widget } from '@lumino/widgets';
+import { PairingPanel } from './sidebar';
+import {
+  PairingStore,
+  type PairingSession,
+  type PartnerRecord,
+  type PresenceLocation
+} from './store';
 
 const PLUGIN_ID = '@csis110/jupyterlab-pairing:plugin';
 const JOIN_COMMAND_ID = '@csis110/jupyterlab-pairing:join-pairing';
@@ -52,27 +60,10 @@ interface RoomResponse {
   error?: string;
 }
 
-interface PairingSession {
-  code: string;
-  provider: HocuspocusProvider;
-}
-
-interface PresenceLocation {
-  id: string;
-  index: number;
-}
-
 interface PresenceAwarenessState {
   user?: { name: string; color: string };
   active?: PresenceLocation | null;
   visible?: PresenceLocation | null;
-}
-
-interface PartnerRecord {
-  color: string;
-  active: PresenceLocation | null;
-  visible: PresenceLocation | null;
-  lastActiveAt: number;
 }
 
 interface PresenceCallbacks {
@@ -339,19 +330,20 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID,
   autoStart: true,
   requires: [INotebookTracker, ISettingRegistry],
-  optional: [ILauncher, ICommandPalette],
+  optional: [ILauncher, ICommandPalette, ILayoutRestorer],
   activate: async (
     app: JupyterFrontEnd,
     notebooks: INotebookTracker,
     settingRegistry: ISettingRegistry,
     launcher: ILauncher | null,
-    palette: ICommandPalette | null
+    palette: ICommandPalette | null,
+    restorer: ILayoutRestorer | null
   ): Promise<void> => {
     const settings = await settingRegistry.load(PLUGIN_ID);
     let serviceUrl = normalizeServiceUrl(
       String(settings.get('serviceUrl').composite)
     );
-    const sessions = new Map<NotebookPanel, PairingSession>();
+    const store = new PairingStore();
 
     settings.changed.connect(() => {
       serviceUrl = normalizeServiceUrl(
@@ -360,14 +352,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
     });
 
     const disconnect = (panel: NotebookPanel): void => {
-      const session = sessions.get(panel);
-      session?.provider.destroy();
-      sessions.delete(panel);
+      store.session(panel)?.provider.destroy();
+      store.setSession(panel, null);
     };
 
     const connect = (
       panel: NotebookPanel,
       code: string,
+      expiresAt: number | null,
       sharedModel: YNotebook
     ): PairingSession => {
       disconnect(panel);
@@ -378,8 +370,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
         document: sharedModel.ydoc,
         awareness: sharedModel.awareness
       });
-      const session = { code, provider };
-      sessions.set(panel, session);
+      const session = { code, expiresAt, provider };
+      store.setSession(panel, session);
+      // The panel can sit collapsed, which would defeat the point of keeping the
+      // code on screen, so reveal it whenever a session begins.
+      app.shell.activateById(pairingPanel.id);
       return session;
     };
 
@@ -387,14 +382,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       try {
         const room = await roomRequest(`${serviceUrl}/api/rooms`);
         const sharedModel = panel.context.model.sharedModel as YNotebook;
-        connect(panel, room.code, sharedModel);
-        await showDialog({
-          title: 'Pairing started',
-          body: `Pairing code: ${room.code}\n\nThis room expires at ${new Date(
-            room.expiresAt
-          ).toLocaleString()}.`,
-          buttons: [Dialog.okButton({ label: 'Close' })]
-        });
+        connect(panel, room.code, room.expiresAt, sharedModel);
       } catch (error) {
         await reportError(error);
       }
@@ -444,11 +432,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
           }
           sharedModel.setMetadata({});
         });
-        connect(panel, room.code, sharedModel);
+        connect(panel, room.code, room.expiresAt, sharedModel);
       } catch (error) {
         await reportError(error);
       }
     };
+
+    const pairingPanel = new PairingPanel({
+      store,
+      onStart: target => void startPairing(target),
+      onJoin: target => void joinPairing(target),
+      onStop: target => disconnect(target)
+    });
+    pairingPanel.id = 'csis110-pairing-panel';
+    pairingPanel.title.icon = pairingIcon;
+    pairingPanel.title.caption = 'Notebook Pairing';
+    app.shell.add(pairingPanel, 'right', { rank: 900 });
+    if (restorer) {
+      restorer.add(pairingPanel, 'csis110-pairing-panel');
+    }
+
+    pairingPanel.setPanel(notebooks.currentWidget);
+    notebooks.currentChanged.connect((_tracker, current) => {
+      pairingPanel.setPanel(current);
+    });
 
     app.commands.addCommand(JOIN_COMMAND_ID, {
       label: 'Join Notebook Pairing',
@@ -475,12 +482,34 @@ const plugin: JupyterFrontEndPlugin<void> = {
     }
 
     notebooks.widgetAdded.connect((_tracker, panel) => {
-      const startButton = new ToolbarButton({
-        className: 'csis110-PairingButton',
+      // Doubles as the pairing indicator: once connected it shows the code and
+      // reveals the panel, rather than still offering to start a second session.
+      const startButton = new ActionButton({
         label: 'Start pairing',
-        onClick: () => void startPairing(panel),
-        tooltip: 'Create a code for a shared notebook session'
+        tooltip: 'Create a code for a shared notebook session',
+        onClick: () => {
+          if (store.session(panel)) {
+            app.shell.activateById(pairingPanel.id);
+          } else {
+            void startPairing(panel);
+          }
+        }
       });
+
+      const renderStartButton = (): void => {
+        const session = store.session(panel);
+        startButton.setLabel(session ? `Pairing: ${session.code}` : 'Start pairing');
+        startButton.buttonNode.title = session
+          ? 'Show the pairing panel'
+          : 'Create a code for a shared notebook session';
+      };
+      renderStartButton();
+      const onStoreChanged = (_store: PairingStore, changed: NotebookPanel): void => {
+        if (changed === panel) {
+          renderStartButton();
+        }
+      };
+      store.changed.connect(onStoreChanged);
 
       let following = false;
       let partners = new Map<number, PartnerRecord>();
@@ -513,6 +542,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       const disposePresence = createPresence(panel, {
         onPartnersChanged: updated => {
           partners = updated;
+          store.setPartners(panel, new Map(updated));
           indicatorButton.setLabel(partnerIndicatorLabel(partners));
           followButton.setEnabled(partners.size > 0);
           if (!partners.size) {
@@ -534,6 +564,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
       panel.disposed.connect(() => {
         disconnect(panel);
         disposePresence();
+        store.changed.disconnect(onStoreChanged);
+        store.remove(panel);
         startButton.dispose();
         indicatorButton.dispose();
         followButton.dispose();
