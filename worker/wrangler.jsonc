@@ -26,8 +26,8 @@
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "csis110-pairing",
-      "database_id": "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+      "database_name": "csis110-jupyterlite-pairing",
+      "database_id": "95d2d947-6866-4c24-ad5c-b1696bf066d3"
     }
   ],
   "vars": {
@@ -36,8 +36,8 @@
     // Both must be set for /admin to exist at all; unset means 404, not 403.
     // ACCESS_TEAM_DOMAIN looks like "yourteam.cloudflareaccess.com" and
     // ACCESS_AUD is the Access application's AUD tag.
-    "ACCESS_TEAM_DOMAIN": "",
-    "ACCESS_AUD": "",
+    "ACCESS_TEAM_DOMAIN": "nchaudhari.cloudflareaccess.com",
+    "ACCESS_AUD": "fe546c6e4266f7c205581c2bdaa85729a26fd793102983785b364aeb170ba830",
     "ADMIN_HISTORY_SECONDS": "604800"
   },
   "observability": {
