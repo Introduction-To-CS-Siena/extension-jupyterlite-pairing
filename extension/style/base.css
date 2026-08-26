@@ -83,3 +83,22 @@
   gap: 6px;
   margin-top: 20px;
 }
+
+/* Deliberately quiet: a shortcut for whoever runs the service, not an action. */
+.csis110-PairingPanel-admin {
+  display: block;
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--jp-border-color2);
+  color: var(--jp-content-link-color, var(--jp-brand-color1));
+  font-size: var(--jp-ui-font-size0);
+  text-decoration: none;
+}
+
+.csis110-PairingPanel-admin:hover {
+  text-decoration: underline;
+}
+
+.csis110-PairingPanel-admin[hidden] {
+  display: none;
+}

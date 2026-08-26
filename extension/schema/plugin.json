@@ -11,6 +11,12 @@
       "description": "HTTPS base URL of the deployed Cloudflare Worker.",
       "type": "string",
       "default": "https://sync-lab.csis110.com"
+    },
+    "showAdminLink": {
+      "title": "Show the admin dashboard link",
+      "description": "Adds a link to the pairing service's admin dashboard in the Notebook Pairing sidebar. Off by default because the sidebar is visible to everyone, and the dashboard is only reachable by whoever Cloudflare Access admits.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false

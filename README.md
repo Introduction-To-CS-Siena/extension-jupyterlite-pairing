@@ -101,6 +101,17 @@ Three places to set it, from most permanent to least:
    the JupyterLab UI. Affects that browser only; handy against a local
    `npm run dev` Worker.
 
+## Getting to the dashboard quickly (`showAdminLink`)
+
+**Settings → Notebook Pairing → Show the admin dashboard link** adds an
+**Admin dashboard ↗** link to the bottom of the pairing sidebar, pointing at
+`<serviceUrl>/admin` and opening in a new tab.
+
+It defaults to **off**, and is worth leaving off in `overrides.json`: the
+sidebar is on screen for every student, and the dashboard is only reachable by
+whoever Access admits. Turn it on in your own browser — the setting is stored
+there and affects nobody else.
+
 ## Worker settings
 
 In [`worker/wrangler.jsonc`](worker/wrangler.jsonc):

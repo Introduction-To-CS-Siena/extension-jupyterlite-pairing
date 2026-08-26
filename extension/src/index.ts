@@ -345,10 +345,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
     );
     const store = new PairingStore();
 
+    const adminUrl = (): string | null =>
+      settings.get('showAdminLink').composite === true
+        ? `${serviceUrl}/admin`
+        : null;
+
     settings.changed.connect(() => {
       serviceUrl = normalizeServiceUrl(
         String(settings.get('serviceUrl').composite)
       );
+      pairingPanel.setAdminUrl(adminUrl());
     });
 
     const disconnect = (panel: NotebookPanel): void => {
@@ -452,6 +458,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       restorer.add(pairingPanel, 'csis110-pairing-panel');
     }
 
+    pairingPanel.setAdminUrl(adminUrl());
     pairingPanel.setPanel(notebooks.currentWidget);
     notebooks.currentChanged.connect((_tracker, current) => {
       pairingPanel.setPanel(current);

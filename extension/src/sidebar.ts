@@ -51,6 +51,7 @@ export class PairingPanel extends Widget {
   private readonly startButton = document.createElement('button');
   private readonly joinButton = document.createElement('button');
   private readonly stopButton = document.createElement('button');
+  private readonly adminLink = document.createElement('a');
 
   constructor(options: PairingPanelOptions) {
     super();
@@ -81,6 +82,21 @@ export class PairingPanel extends Widget {
   setPanel(panel: NotebookPanel | null): void {
     this.panel = panel;
     this.render();
+  }
+
+  /**
+   * Shows or hides the shortcut to the admin dashboard.
+   *
+   * Hidden unless someone opts in, because this panel is on screen for every
+   * student and the dashboard is only reachable by whoever Access lets in.
+   */
+  setAdminUrl(url: string | null): void {
+    if (url) {
+      this.adminLink.href = url;
+    } else {
+      this.adminLink.removeAttribute('href');
+    }
+    this.adminLink.hidden = !url;
   }
 
   private onStoreChanged(_store: PairingStore, changed: NotebookPanel): void {
@@ -134,6 +150,16 @@ export class PairingPanel extends Widget {
       actions.appendChild(button);
     }
     root.appendChild(actions);
+
+    // A new tab, not a navigation: leaving the page would tear down the
+    // JupyterLite session, and the dashboard may bounce through an Access
+    // login on the way.
+    this.adminLink.className = 'csis110-PairingPanel-admin';
+    this.adminLink.target = '_blank';
+    this.adminLink.rel = 'noopener noreferrer';
+    this.adminLink.textContent = 'Admin dashboard ↗';
+    this.adminLink.hidden = true;
+    root.appendChild(this.adminLink);
 
     this.node.appendChild(root);
   }
