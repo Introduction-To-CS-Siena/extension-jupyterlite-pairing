@@ -10,7 +10,7 @@
       "title": "Pairing service URL",
       "description": "HTTPS base URL of the deployed Cloudflare Worker.",
       "type": "string",
-      "default": "https://sync.lab.csis110.com"
+      "default": "https://sync-lab.csis110.com"
     }
   },
   "additionalProperties": false

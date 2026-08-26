@@ -46,7 +46,7 @@ csis110-jupyterlab-pairing==0.2.0
 Installing the wheel registers the prebuilt extension. A normal
 `jupyter lite build` then copies it into the static site automatically.
 
-By default the extension talks to `https://sync.lab.csis110.com`, the Worker
+By default the extension talks to `https://sync-lab.csis110.com`, the Worker
 deployed from this repository for its own site. If you're reusing this
 extension for a different site, you almost certainly want to point it at
 your own Worker — see **Configuration** below.
@@ -98,7 +98,7 @@ The Worker side lives in [`worker/wrangler.jsonc`](worker/wrangler.jsonc):
   this Worker (and any local dev origins you use).
 - `vars.ROOM_TTL_SECONDS` controls how long a pairing room lives before it
   expires.
-- The Worker's own hostname (`sync.lab.csis110.com` in this repository) is
+- The Worker's own hostname (`sync-lab.csis110.com` in this repository) is
   set by attaching a [custom
   domain](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/)
   in the Cloudflare dashboard, not in this file. Whatever domain you attach
@@ -154,7 +154,15 @@ one.
 
 1. In the Cloudflare dashboard, create a **self-hosted Access application**
    for `<your-worker-domain>/admin*`. The single `/admin*` prefix covers both
-   the page and its API, so there is no second path to remember.
+   the page and its API, so there is no second path to remember. A bare
+   `/admin` destination does not — it matches that one path and leaves
+   `/admin/api/…` ungated.
+
+   List **only the Worker's hostname** as a destination. Access issues its
+   session cookie per hostname, so adding a second hostname (the JupyterLite
+   site, say) makes the login flow bounce through
+   `<other-host>/cdn-cgi/access/authorized` to plant a cookie there, which
+   looks like the dashboard redirecting to the wrong domain.
 2. Add a policy for whoever should get in (an email, a group, an identity
    provider rule).
 3. Copy the application's **AUD tag**.
