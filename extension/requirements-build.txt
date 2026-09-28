@@ -1,5 +1,5 @@
-build==1.5.0
-jupyter-builder==1.2.2
-jupyterlab==4.6.3
+build==1.6.1
+jupyter-builder==1.2.3
+jupyterlab==4.6.4
 setuptools==84.0.0
 
